@@ -1,73 +1,227 @@
-import React, { useEffect } from "react";
-import { X, Globe, MapPin } from "lucide-react"; // Using lucide-react which is already in package.json
+import React, { useEffect, useState } from "react";
+import api from "../api/axiosClient";
 
-const ApplyModal = ({ isOpen, onClose, scholarshipName, applyLink, onOfflineClick }) => {
-  // Prevent scrolling when modal is open
+const ApplyModal = ({
+  scholarship,
+  applyLink,
+  onClose,
+}) => {
+  const [showOffline, setShowOffline] = useState(false);
+  const [city, setCity] = useState("");
+  const [centers, setCenters] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+
+  // Prevent background scrolling
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+    document.body.style.overflow = "hidden";
 
-  if (!isOpen) return null;
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  // Online Apply
+  const handleOnlineApply = () => {
+
+    const link =
+      applyLink ||
+      scholarship?.applyLink ||
+      scholarship?.link ||
+      scholarship?.url;
+
+    if (!link) {
+      alert("Application link not available");
+      return;
+    }
+
+    window.open(link, "_blank");
+  };
+
+  // Offline Apply
+  const handleOfflineApply = () => {
+    setShowOffline(true);
+  };
+
+  const fetchCenters = async () => {
+    try {
+      setLoading(true);
+      setSearched(true);
+      const res = await api.get(`/centers${city ? `?city=${city}` : ""}`);
+      setCenters(res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch centers");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-      <div 
-        className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 transform transition-all scale-100 opacity-100"
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(0,0,0,0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 9999,
+      }}
+    >
+      <div
         onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          width: "420px",
+          maxWidth: "90%",
+          borderRadius: "18px",
+          padding: "28px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+          position: "relative",
+          textAlign: "center",
+        }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "16px",
+            border: "none",
+            background: "transparent",
+            fontSize: "22px",
+            cursor: "pointer",
+            color: "#555",
+          }}
         >
-          <X size={20} />
+          ✕
         </button>
 
-        {/* Modal Header */}
-        <div className="mb-6 pr-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Apply for Scholarship</h2>
-          <p className="text-sm text-gray-500 line-clamp-2">
-            Choose how you would like to apply for the <span className="font-semibold">{scholarshipName}</span>.
-          </p>
-        </div>
+        {/* Title */}
+        <h2
+          style={{
+            marginBottom: "10px",
+            fontSize: "24px",
+            fontWeight: "bold",
+          }}
+        >
+          Apply for Scholarship
+        </h2>
 
-        {/* Options */}
-        <div className="space-y-4">
-          {/* Apply Online */}
-          <button
-            onClick={() => window.open(applyLink, "_blank")}
-            className="w-full group relative flex items-center p-4 border-2 border-blue-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
-          >
-            <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-full group-hover:scale-110 transition-transform">
-              <Globe size={24} />
-            </div>
-            <div className="ml-4 text-left">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-700">Apply Online</h3>
-              <p className="text-sm text-gray-500">Redirects to the official portal</p>
-            </div>
-          </button>
+        {!showOffline ? (
+          <>
+            {/* Subtitle */}
+            <p
+              style={{
+                color: "#666",
+                marginBottom: "24px",
+              }}
+            >
+              Choose how you would like to apply.
+            </p>
 
-          {/* Apply Offline */}
-          <button
-            onClick={onOfflineClick}
-            className="w-full group relative flex items-center p-4 border-2 border-green-100 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all duration-200"
-          >
-            <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-full group-hover:scale-110 transition-transform">
-              <MapPin size={24} />
+            {/* Buttons */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px",
+              }}
+            >
+              <button
+                onClick={handleOnlineApply}
+                style={{
+                  background: "#2563eb",
+                  color: "white",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Apply Online
+              </button>
+
+              <button
+                onClick={handleOfflineApply}
+                style={{
+                  background: "#16a34a",
+                  color: "white",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Apply Offline
+              </button>
             </div>
-            <div className="ml-4 text-left">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-700">Apply Offline</h3>
-              <p className="text-sm text-gray-500">Find nearby help centers</p>
+          </>
+        ) : (
+          <>
+            <p style={{ color: "#666", marginBottom: "16px" }}>
+              Find an offline center near you.
+            </p>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+              <input
+                type="text"
+                placeholder="Search by city (e.g. Bangalore)"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px"
+                }}
+              />
+              <button
+                onClick={fetchCenters}
+                style={{
+                  background: "#8b5cf6",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                Search
+              </button>
             </div>
-          </button>
-        </div>
+            
+            <div style={{ maxHeight: "300px", overflowY: "auto", textAlign: "left" }}>
+              {loading ? (
+                <p style={{ textAlign: "center", color: "#666" }}>Loading centers...</p>
+              ) : searched && centers.length === 0 ? (
+                <p style={{ textAlign: "center", color: "#666" }}>No centers found.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {centers.map(center => (
+                    <div key={center._id} style={{ border: "1px solid #eee", padding: "16px", borderRadius: "10px" }}>
+                      <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "4px" }}>{center.name}</div>
+                      <div style={{ fontSize: "14px", color: "#555", marginBottom: "4px" }}>{center.address}, {center.city}</div>
+                      <div style={{ fontSize: "14px", color: "#000" }}>📞 {center.contactPhone}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

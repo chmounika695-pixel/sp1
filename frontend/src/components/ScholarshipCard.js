@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ApplyModal from "./ApplyModal";
 
 const ScholarshipCard = ({ scholarship }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   if (!scholarship) return null;
 
   const {
@@ -18,7 +19,7 @@ const ScholarshipCard = ({ scholarship }) => {
   } = scholarship;
 
   const casteText = Array.isArray(caste) ? caste.join(", ") : caste;
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
   return (
     <div className="card">
@@ -64,17 +65,13 @@ const ScholarshipCard = ({ scholarship }) => {
           </button>
         )}
       </div>
-
-      <ApplyModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        scholarshipName={name}
-        applyLink={applyLink}
-        onOfflineClick={() => {
-          // Placeholder for offline click functionality
-          console.log("Offline apply clicked");
-        }}
-      />
+      {isModalOpen && (
+        <ApplyModal
+          scholarship={scholarship}
+          applyLink={applyLink}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

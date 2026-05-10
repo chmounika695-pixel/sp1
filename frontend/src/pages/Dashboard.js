@@ -113,15 +113,13 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <ApplyModal
-        isOpen={!!selectedScholarship}
-        onClose={() => setSelectedScholarship(null)}
-        scholarshipName={selectedScholarship?.name}
-        applyLink={selectedScholarship?.applyLink}
-        onOfflineClick={() => {
-          console.log("Offline apply clicked for", selectedScholarship?.name);
-        }}
-      />
+      {selectedScholarship && (
+        <ApplyModal
+          scholarship={selectedScholarship}
+          applyLink={selectedScholarship.applyLink}
+          onClose={() => setSelectedScholarship(null)}
+        />
+      )}
     </div>
   );
 };
