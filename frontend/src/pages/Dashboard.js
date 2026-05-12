@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosClient";
 import ApplyModal from "../components/ApplyModal";
-
+import ReminderModal from "../components/ReminderModal";
 const Dashboard = () => {
   const [scholarships, setScholarships] = useState([]);
   const [selectedScholarship, setSelectedScholarship] = useState(null);
+  const [selectedReminder, setSelectedReminder] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,9 +69,39 @@ const Dashboard = () => {
                     {s.applyLink && (
                       <button
                         onClick={() => setSelectedScholarship(s)}
+                        
                         style={{ ...styles.applyLink, cursor: "pointer", border: "none" }}
                       >
                         Apply
+            <button
+  onClick={() => setSelectedReminder(s)}
+  style={{
+    background: "linear-gradient(135deg, #22c55e, #16a34a)",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    padding: "8px 14px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+    marginLeft: "8px",
+    transition: "0.3s ease",
+    boxShadow: "0 2px 8px rgba(34,197,94,0.3)",
+    minWidth: "95px",
+  }}
+  onMouseOver={(e) => {
+    e.target.style.transform = "translateY(-2px)";
+    e.target.style.boxShadow =
+      "0 4px 12px rgba(34,197,94,0.4)";
+  }}
+  onMouseOut={(e) => {
+    e.target.style.transform = "translateY(0px)";
+    e.target.style.boxShadow =
+      "0 2px 8px rgba(34,197,94,0.3)";
+  }}
+>
+  🔔 Reminder
+</button>
                       </button>
                     )}
                   </div>
@@ -103,7 +134,24 @@ const Dashboard = () => {
                         style={{ ...styles.applyLink, cursor: "pointer", border: "none" }}
                       >
                         Apply
+                        <button
+  onClick={() => setSelectedReminder(s)}
+  style={{
+    backgroundColor: "#16a34a",
+    color: "white",
+    border: "none",
+    padding: "6px 14px",
+    borderRadius: "4px",
+    fontSize: "12px",
+    fontWeight: "500",
+    cursor: "pointer",
+    marginLeft: "8px",
+  }}
+>
+  Reminder
+</button>
                       </button>
+                      
                     )}
                   </div>
                 ))
@@ -120,6 +168,14 @@ const Dashboard = () => {
           onClose={() => setSelectedScholarship(null)}
         />
       )}
+      {selectedReminder && (
+  <ReminderModal
+    scholarshipName={selectedReminder.name}
+    onClose={() =>
+      setSelectedReminder(null)
+    }
+  />
+)}
     </div>
   );
 };
@@ -200,13 +256,14 @@ const styles = {
     maxHeight: "400px",
     overflowY: "auto",
   },
-  listItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 0",
-    borderBottom: "1px solid #eee",
-  },
+listItem: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "14px 0",
+  borderBottom: "1px solid #eee",
+  gap: "12px",
+},
   itemContent: {
     fontSize: "14px",
     color: "#444",
